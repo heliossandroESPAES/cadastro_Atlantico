@@ -1,0 +1,28 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#072b5a">
+    <title><c:out value="${pageTitle}"/> | Banco ATLANTICO</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css">
+    <script defer src="${pageContext.request.contextPath}/assets/js/app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+<header class="site-header">
+    <div class="nav-shell">
+        <a class="brand" href="${pageContext.request.contextPath}/candidaturas" aria-label="Banco ATLANTICO - inicio">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span><strong>BANCO ATLANTICO</strong><small>Talento &amp; Carreiras</small></span>
+        </a>
+        <nav class="main-nav" aria-label="Navegação principal">
+            <a class="${pageKey eq 'list' ? 'nav-link active' : 'nav-link'}"
+               href="${pageContext.request.contextPath}/candidaturas">Candidaturas</a>
+            <a class="${pageKey eq 'form' ? 'button button-small' : 'button button-small'}"
+               href="${pageContext.request.contextPath}/candidaturas/nova">Nova candidatura</a>
+        </nav>
+    </div>
+</header>
+<main id="conteudo">

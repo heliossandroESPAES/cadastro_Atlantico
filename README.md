@@ -1,366 +1,245 @@
-# Cadastro Atlantico
+# Cadastro ATLANTICO — Aplicacao Web em 3 Camadas
 
-Aplicacao de candidatura profissional em JavaFX com persistencia por ficheiro de acesso aleatorio, validacao obrigatoria dos campos e consulta direta por numero de registo.
+Sistema web de candidaturas profissionais adaptado para os requisitos do exame:
 
-Este README foi escrito para o grupo conseguir entender a arquitetura, explicar o projeto na defesa e demonstrar com clareza como a aplicacao funciona do inicio ao fim.
+- **Modelo:** JavaBeans + DAO + PostgreSQL
+- **Controlador:** Jakarta Servlets
+- **Visao:** JSP/JSTL renderizada em HTML
+- **SDK obrigatorio:** Java 17
+- **Empacotamento:** WAR para Tomcat 10.1+
 
-## 1. Objetivo do projeto
+## 1. Funcionalidades
 
-O projeto simula um formulario de candidatura profissional para o Banco Atlantico.
+- registo completo de uma candidatura profissional
+- confirmacao visual depois da submissao
+- listagem das 100 candidaturas mais recentes
+- pesquisa por nome ou B.I./Passaporte
+- consulta detalhada pelo numero do registo
+- areas de estudo e interesse com relacionamento muitos-para-muitos
+- validacao no navegador, no Servlet/Service e na base de dados
+- validacao segura de URLs de LinkedIn e portfolio
+- interface responsiva para computador, tablet e telemovel
 
-O utilizador pode:
+## 2. Tecnologias e versoes
 
-- preencher todos os campos do formulario
-- submeter a candidatura
-- guardar os dados num ficheiro de acesso aleatorio
-- receber uma tela de agradecimento com o numero do registo criado
-- consultar uma candidatura depois, usando apenas o numero do registo
+| Tecnologia | Versao/uso |
+|---|---|
+| Java SDK | **17** (`maven.compiler.release=17`) |
+| Jakarta Servlet | 6.0 |
+| JSP/JSTL | 3.0 |
+| PostgreSQL JDBC | 42.7.9 |
+| PostgreSQL | 14 ou superior |
+| Servidor recomendado | Tomcat 10.1 ou superior |
+| Maven | 3.8 ou superior |
 
-O ponto principal para a defesa e mostrar que o sistema nao grava apenas texto qualquer, mas organiza a informacao em registos fixos para permitir leitura direta com `RandomAccessFile`.
+> Atencao: Tomcat 9 usa os pacotes antigos `javax.servlet` e nao e compativel com esta aplicacao. Use Tomcat 10.1+, que suporta `jakarta.servlet`.
 
-## 2. Tecnologias e configuracao atual
+## 3. Arquitectura em tres camadas
 
-- GUI: JavaFX
-- Linguagem: Java
-- Projeto: Maven / NetBeans
-- Persistencia: `RandomAccessFile`
-- Estrutura modular: `module-info.java`
+```text
+Navegador
+   │ HTTP
+   ▼
+Servlets (Controlador)
+   │ cria/consulta Beans e chama servicos
+   ▼
+Service + JavaBean (Modelo e regras)
+   │ chama o DAO
+   ▼
+DAO com JDBC e PreparedStatement
+   │ SQL parametrizado
+   ▼
+PostgreSQL
 
-Observacao importante:
-
-- O projeto esta configurado no `pom.xml` com Java 21 e JavaFX 22 para conseguir correr no ambiente atual.
-- A camada de negocio e a camada de persistencia foram escritas com estilo simples e compativel com Java 8: classes normais, getters/setters, `StringBuilder`, `RandomAccessFile`, excecoes personalizadas e sem dependencia de recursos modernos desnecessarios.
-
-## 3. Estrutura do projeto
-
-### 3.1 Camadas principais
-
-- GUI JavaFX: [src/main/java/com/mycompany/teste/App.java](src/main/java/com/mycompany/teste/App.java)
-- Modelo de dados: [src/main/java/com/mycompany/teste/model/Candidatura.java](src/main/java/com/mycompany/teste/model/Candidatura.java)
-- Camada de negocio: [src/main/java/com/mycompany/teste/service/CandidaturaService.java](src/main/java/com/mycompany/teste/service/CandidaturaService.java)
-- Excecao de validacao: [src/main/java/com/mycompany/teste/service/ValidationException.java](src/main/java/com/mycompany/teste/service/ValidationException.java)
-- Persistencia com acesso aleatorio: [src/main/java/com/mycompany/teste/persistence/RandomAccessCandidaturaRepository.java](src/main/java/com/mycompany/teste/persistence/RandomAccessCandidaturaRepository.java)
-- Resultado da gravacao: [src/main/java/com/mycompany/teste/persistence/SubmissionStorage.java](src/main/java/com/mycompany/teste/persistence/SubmissionStorage.java)
-- Estilos da interface: [src/main/resources/com/mycompany/teste/atlantico-theme.css](src/main/resources/com/mycompany/teste/atlantico-theme.css)
-
-### 3.2 Responsabilidade de cada ficheiro
-
-#### `App.java`
-
-Responsavel apenas por:
-
-- montar a interface JavaFX
-- recolher os dados digitados no formulario
-- converter esses dados para um objeto `Candidatura`
-- chamar a camada de negocio
-- trocar entre a tela do formulario, a tela de agradecimento e a tela de consulta
-
-Nao deve conter a regra principal de persistencia. A GUI apenas pede servicos a outras camadas.
-
-#### `Candidatura.java`
-
-Representa uma candidatura completa. E o modelo de dados da aplicacao.
-
-Contem:
-
-- os atributos da candidatura
-- getters e setters
-- um metodo que converte o objeto num `Map<String, String>` para a persistencia
-
-#### `CandidaturaService.java`
-
-Representa a camada de negocio.
-
-E a classe que decide:
-
-- se a candidatura pode ou nao ser submetida
-- se todos os campos obrigatorios estao preenchidos
-- se o consentimento foi aceite
-- quando deve chamar o repositorio para gravar
-- quando deve chamar o repositorio para ler um registo
-
-#### `ValidationException.java`
-
-Serve para avisar a GUI que um campo obrigatorio nao foi preenchido corretamente.
-
-Vantagem:
-
-- a validacao fica centralizada na camada de negocio
-- a GUI apenas mostra a mensagem ao utilizador
-
-#### `RandomAccessCandidaturaRepository.java`
-
-Representa a camada de persistencia.
-
-Responsavel por:
-
-- abrir o ficheiro `candidaturas.dat`
-- escrever novos registos no fim do ficheiro
-- calcular offsets para leitura direta
-- ler um registo especifico usando `seek()`
-
-#### `SubmissionStorage.java`
-
-Objeto simples que devolve para a GUI:
-
-- o caminho do ficheiro usado
-- o numero do registo criado
-
-Isto e importante para a tela de agradecimento e para a demonstracao da consulta por registo.
-
-## 4. Fluxo funcional da aplicacao
-
-### 4.1 Submissao do formulario
-
-O fluxo de submissao e este:
-
-1. o utilizador preenche o formulario JavaFX
-2. a GUI recolhe os valores e cria um objeto `Candidatura`
-3. a GUI chama `candidaturaService.submeter(candidatura)`
-4. a camada de negocio valida os campos obrigatorios
-5. se algum campo estiver vazio, a camada de negocio lanca `ValidationException`
-6. se a candidatura estiver valida, a camada de negocio chama o repositorio
-7. o repositorio grava o registo em `candidaturas.dat`
-8. o repositorio devolve o numero do registo gravado
-9. a GUI mostra a tela de agradecimento com o numero desse registo
-
-### 4.2 Consulta por numero de registo
-
-Agora a aplicacao tem tambem uma tela de consulta por registo.
-
-O fluxo da consulta e este:
-
-1. o utilizador abre a tela `Consultar Registo`
-2. pode escolher entre tres formas de consulta
-3. ler por numero do registo
-4. pesquisar por nome do candidato
-5. listar todos os registos gravados
-6. a camada de negocio delega ao repositorio
-7. o repositorio percorre os registos e devolve apenas o que foi pedido
-8. o conteudo encontrado e mostrado no ecran
-
-Esta tela existe para demonstrar, na pratica, que o ficheiro foi desenhado para acesso aleatorio e nao apenas para leitura sequencial.
-
-## 5. Como o ficheiro de acesso aleatorio esta organizado
-
-O ficheiro principal e:
-
-- `inscricoes/candidaturas.dat`
-
-Cada candidatura e guardada como um registo fixo com esta estrutura:
-
-1. `1 byte` para indicar se o registo esta ativo
-2. `4 bytes` com o tamanho real do texto guardado
-3. `8192 bytes` reservados para o conteudo da candidatura
-
-Logo, o tamanho total de cada registo e:
-
-$$
-RECORD\_SIZE = 1 + 4 + 8192 = 8197\ bytes
-$$
-
-## 6. Formula de acesso direto
-
-Se queremos ler o registo `n`, nao precisamos ler o ficheiro todo desde o inicio.
-
-Calculamos diretamente a posicao:
-
-$$
-offset = (n - 1) \times RECORD\_SIZE
-$$
-
-Exemplo:
-
-- registo 1: offset `0`
-- registo 2: offset `8197`
-- registo 3: offset `16394`
-
-Depois disso, o codigo faz:
-
-```java
-file.seek(offset);
+Servlet ──forward──► JSP/JSTL (Visao) ──► HTML/CSS/JavaScript
 ```
 
-Esse e o ponto mais importante da persistencia para a defesa.
+### Ficheiros principais
 
-## 7. Porque isto e acesso aleatorio e nao apenas sequencial
+- Bean: `src/main/java/ao/co/atlantico/candidaturas/model/Candidatura.java`
+- DAO: `src/main/java/ao/co/atlantico/candidaturas/dao/CandidaturaDAO.java`
+- conexao: `src/main/java/ao/co/atlantico/candidaturas/dao/ConnectionFactory.java`
+- regras e validacao: `src/main/java/ao/co/atlantico/candidaturas/service/CandidaturaService.java`
+- controlador: `src/main/java/ao/co/atlantico/candidaturas/web/CandidaturaServlet.java`
+- visoes: `src/main/webapp/WEB-INF/views/`
+- esquema SQL: `src/main/resources/db/schema.sql`
+- interface: `src/main/webapp/assets/`
 
-Num ficheiro sequencial simples, para chegar ao registo 50 normalmente seria preciso ler os registos anteriores um a um.
+## 4. Base de dados PostgreSQL
 
-Aqui, como cada bloco tem tamanho fixo, a aplicacao consegue:
+O esquema possui tres tabelas normalizadas:
 
-- calcular onde o registo comeca
-- saltar diretamente para essa posicao
-- ler apenas aquele bloco
+```text
+candidatura 1 ────── N candidatura_area N ────── 1 area
+```
 
-Isto cumpre o criterio de ficheiros de acesso aleatorio pedido para a defesa.
+- `candidatura`: dados pessoais, academicos e profissionais
+- `area`: catalogo de areas, separado por `ESTUDO` e `INTERESSE`
+- `candidatura_area`: tabela associativa muitos-para-muitos
 
-## 8. Validacao de negocio
+Existem chaves primarias, estrangeiras, `UNIQUE`, `CHECK` e indices para pesquisa. O DAO grava a candidatura e as suas areas dentro da mesma transacao; qualquer falha provoca `rollback`.
 
-Todos os campos do formulario sao obrigatorios.
+### Criar a base manualmente
 
-A regra principal de validacao fica em `CandidaturaService`, nao na persistencia.
+```sql
+CREATE USER cadastro_app WITH PASSWORD 'cadastro123';
+CREATE DATABASE cadastro_atlantico OWNER cadastro_app;
+```
 
-Existe tambem uma validacao preventiva na GUI, para evitar que o utilizador digite caracteres claramente invalidos antes mesmo de submeter.
+As tabelas e os catalogos sao criados automaticamente pelo `schema.sql` quando a aplicacao arranca.
 
-Em resumo:
-
-- a GUI previne entradas absurdas
-- a camada de negocio confirma se os dados sao mesmo validos
-- a persistencia so grava quando tudo estiver correto
-
-Sao validados, entre outros:
-
-- dados pessoais
-- escolaridade
-- area de estudo
-- area de interesse
-- objectivos profissionais
-- resumo profissional
-- assinatura
-- data de assinatura
-- consentimento de dados
-
-### 8.1 Regras novas aplicadas na GUI
-
-No `App.java`, alguns campos passaram a ter filtros de digitacao:
-
-- `Contacto Telefonico`: aceita apenas digitos e limita a 9 caracteres
-- `Nome Completo` e `Assinatura do Candidato`: aceitam apenas letras, espacos, apostrofos, hifens e ponto
-- `Nacionalidade`, `Residencia (Pais)`, `Provincia` e `Pais da Formacao`: aceitam apenas letras, espacos, apostrofos e hifens
-- `B.I. / Passaporte`: aceita apenas letras, numeros, `/` e `-`
-- `E-mail`: nao aceita espacos nem caracteres claramente invalidos
-- `DatePicker`: o editor passou a usar o formato `dd/MM/yyyy`, com filtro de digitos e barra
-
-Isto melhora a experiencia do utilizador porque reduz erros logo durante o preenchimento.
-
-### 8.2 Regras novas aplicadas na camada de negocio
-
-Mesmo que a GUI deixe passar algo por engano, a camada de negocio ainda valida tudo antes de gravar.
-
-Agora o servico verifica tambem:
-
-- telefone com exatamente 9 digitos
-- e-mail com formato valido
-- nome completo sem numeros e com comprimento minimo coerente
-- assinatura sem numeros e com comprimento minimo coerente
-- nacionalidade, pais de residencia, provincia e pais da formacao sem numeros
-- B.I. / Passaporte com 6 a 20 caracteres alfanumericos, podendo incluir `/` ou `-`
-- datas no formato `dd/MM/yyyy`
-- datas impossiveis, como `31/02/2026`
-- datas futuras nao sao aceites
-- data de fim de curso nao pode ser anterior a data de nascimento
-- data de assinatura nao pode ser anterior a data de nascimento
-
-Casos especiais:
-
-- se a opcao `Outra` for marcada em area de estudo, o texto explicativo tambem passa a ser obrigatorio
-- se a opcao `Outro` for marcada em area de interesse, o texto explicativo tambem passa a ser obrigatorio
-- a `Data de Conclusao do Curso` passou a ser opcional
-- se essa data for preenchida, continua a ser validada e nao pode ser futura nem anterior a data de nascimento
-
-### 8.3 Exemplo pratico de validacao
-
-Exemplos de entradas rejeitadas:
-
-- telefone `92345` porque nao tem 9 digitos
-- nome `Joao123` porque contem numeros
-- data `31/02/2026` porque a data nao existe
-- data `12/12/2035` porque e futura
-- BI `A1` porque nao atinge o tamanho minimo esperado
-
-## 9. Ecras da aplicacao
-
-### 9.1 Formulario principal
-
-Mostra todas as secoes da candidatura:
-
-- dados pessoais
-- habilitacoes academicas
-- areas de interesse
-- informacoes adicionais
-- termos e consentimento
-
-Tambem tem um botao `Consultar Registo`, para demonstrar a leitura direta do ficheiro mesmo sem voltar a submeter outro formulario.
-
-### 9.2 Tela de agradecimento
-
-Depois da submissao bem sucedida, o sistema mostra:
-
-- confirmacao da candidatura
-- caminho do ficheiro `.dat`
-- numero do registo criado
-- tamanho do registo fixo
-
-Esta tela tem dois objetivos:
-
-- mostrar ao utilizador que a gravacao foi bem sucedida
-- dar ao grupo um ponto visual forte para explicar a persistencia na defesa
-
-### 9.3 Tela de consulta
-
-Permite:
-
-- informar um numero de registo
-- pesquisar candidaturas por nome
-- listar todos os registos existentes
-- localizar o conteudo gravado no ficheiro
-- mostrar o conteudo no ecran
-
-Esta e a melhor parte da demo tecnica do projeto.
-
-## 10. Como demonstrar na defesa
-
-Sugestao de roteiro simples:
-
-1. abrir o formulario principal
-2. explicar rapidamente as camadas do sistema
-3. preencher e submeter uma candidatura
-4. mostrar a tela de agradecimento com o numero do registo
-5. abrir a consulta por registo
-6. usar o numero recebido para ler o registo ao vivo
-7. explicar a formula do offset
-8. mostrar no codigo o metodo `readRecord()` do repositorio
-
-Se o professor perguntar onde esta a separacao de responsabilidades, a resposta e:
-
-- a GUI recolhe e mostra dados
-- a camada de negocio valida e coordena
-- a persistencia grava e le o ficheiro de acesso aleatorio
-
-## 11. Ficheiros mais importantes para mostrar ao professor
-
-Se houver pouco tempo na defesa, estes sao os ficheiros que valem mais a pena abrir:
-
-1. [src/main/java/com/mycompany/teste/App.java](src/main/java/com/mycompany/teste/App.java)
-2. [src/main/java/com/mycompany/teste/service/CandidaturaService.java](src/main/java/com/mycompany/teste/service/CandidaturaService.java)
-3. [src/main/java/com/mycompany/teste/persistence/RandomAccessCandidaturaRepository.java](src/main/java/com/mycompany/teste/persistence/RandomAccessCandidaturaRepository.java)
-4. [src/main/java/com/mycompany/teste/model/Candidatura.java](src/main/java/com/mycompany/teste/model/Candidatura.java)
-
-## 12. Como validar no ambiente atual
-
-O Maven nao estava disponivel no ambiente usado durante o desenvolvimento, por isso a validacao foi feita com `javac` e os jars JavaFX existentes no cache local.
-
-Exemplo de validacao completa:
+### Criar com Docker (opcional)
 
 ```bash
-JAVAFX_MP="$HOME/.m2/repository/org/openjfx/javafx-base/22/javafx-base-22.jar:$HOME/.m2/repository/org/openjfx/javafx-base/22/javafx-base-22-linux.jar:$HOME/.m2/repository/org/openjfx/javafx-controls/22/javafx-controls-22.jar:$HOME/.m2/repository/org/openjfx/javafx-controls/22/javafx-controls-22-linux.jar:$HOME/.m2/repository/org/openjfx/javafx-fxml/22/javafx-fxml-22.jar:$HOME/.m2/repository/org/openjfx/javafx-fxml/22/javafx-fxml-22-linux.jar:$HOME/.m2/repository/org/openjfx/javafx-graphics/22/javafx-graphics-22.jar:$HOME/.m2/repository/org/openjfx/javafx-graphics/22/javafx-graphics-22-linux.jar"
-
-javac --module-path "$JAVAFX_MP" \
-	--add-modules javafx.controls,javafx.fxml,javafx.graphics \
-	-d /tmp/cadastro-atlantico-app-check \
-	$(find src/main/java -name '*.java')
+docker compose up -d db
 ```
 
-## 13. Resumo final para o grupo
+## 5. Configuracao da conexao
 
-Em linguagem simples, o projeto funciona assim:
+A aplicacao le a configuracao de variaveis de ambiente. Os valores abaixo sao os valores padrao:
 
-- o formulario recolhe os dados
-- os dados viram um objeto `Candidatura`
-- o servico valida tudo
-- o repositorio grava a candidatura num bloco fixo dentro de um ficheiro `.dat`
-- o sistema devolve o numero do registo criado
-- esse numero pode ser usado depois para consultar diretamente a candidatura
+```bash
+export DB_URL='jdbc:postgresql://localhost:5432/cadastro_atlantico'
+export DB_USER='cadastro_app'
+export DB_PASSWORD='cadastro123'
+```
 
-Se o grupo souber explicar bem estas seis ideias, a defesa fica tecnicamente forte e coerente com os criterios de avaliacao.
+Nunca grave uma senha real no repositorio. Em alternativa, podem ser usadas propriedades da JVM:
+
+```bash
+-Ddb.url=jdbc:postgresql://localhost:5432/cadastro_atlantico
+-Ddb.user=cadastro_app
+-Ddb.password=cadastro123
+```
+
+## 6. Compilar obrigatoriamente com Java 17
+
+### Neste computador
+
+O JDK 17 local do projecto pode ser activado no terminal sem `sudo`:
+
+```bash
+source scripts/use-java17.sh
+```
+
+Depois disso, `java --version`, `javac --version` e `mvn -version` devem mostrar `17.0.19`. O VS Code tambem esta configurado para usar esse JDK por defeito neste workspace.
+
+Para instalar Java 17 globalmente no Ubuntu, operacao que exige a palavra-passe do utilizador:
+
+```bash
+sudo apt install openjdk-17-jdk
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+```
+
+Confirme primeiro o ambiente:
+
+```bash
+java -version
+mvn -version
+```
+
+As duas saidas devem indicar Java 17. Depois execute:
+
+```bash
+mvn clean test
+mvn package
+```
+
+O resultado sera:
+
+```text
+target/cadastro-atlantico.war
+```
+
+O `pom.xml` usa `maven.compiler.release=17`, que impede acidentalmente a utilizacao de APIs de Java 18, 21 ou 25, mesmo que outro JDK esteja activo na maquina de desenvolvimento.
+
+## 7. Executar no Tomcat 10.1+
+
+1. crie a base `cadastro_atlantico`
+2. configure `DB_URL`, `DB_USER` e `DB_PASSWORD`
+3. compile com `mvn clean package`
+4. copie `target/cadastro-atlantico.war` para a pasta `webapps` do Tomcat
+5. inicie o Tomcat
+6. abra `http://localhost:8080/cadastro-atlantico/`
+
+No NetBeans:
+
+1. abra o projecto como projecto Maven
+2. em **Java Platform**, seleccione **JDK 17**
+3. adicione um servidor **Tomcat 10.1+**
+4. associe o projecto ao servidor e use **Run**
+
+## 8. Rotas da aplicacao
+
+| Metodo | Rota | Responsabilidade |
+|---|---|---|
+| GET | `/candidaturas` | lista e pesquisa candidaturas |
+| GET | `/candidaturas/nova` | apresenta o formulario JSP |
+| POST | `/candidaturas/nova` | valida e grava no PostgreSQL |
+| GET | `/candidaturas/detalhe?id=1` | consulta um registo pelo ID |
+
+As JSP ficam dentro de `WEB-INF`, portanto nao podem ser chamadas directamente. O acesso passa sempre pelo controlador Servlet.
+
+## 9. Robustez e seguranca
+
+A aplicacao implementa:
+
+- campos obrigatorios e limites de tamanho
+- e-mail, telefone, documento e datas validados no servidor
+- pais/provincia e opcoes de catalogo validados contra listas permitidas
+- URLs aceites apenas com `http://` ou `https://`, host valido e sem credenciais embutidas
+- `PreparedStatement` em todas as consultas contra SQL Injection
+- `<c:out>` nas JSP contra XSS
+- token CSRF na submissao
+- cabecalhos CSP, `nosniff`, `DENY` e politica de permissoes
+- transacao, `commit` e `rollback` no DAO
+- mensagens amigaveis sem expor detalhes internos da base de dados
+- restricoes `UNIQUE`, `CHECK` e chaves estrangeiras no PostgreSQL
+- padrao POST/Redirect/GET para impedir submissao duplicada ao actualizar a pagina
+
+## 10. Relacao com os criterios de avaliacao
+
+| Criterio | Evidencia para mostrar |
+|---|---|
+| Funcionalidade | submeter, listar, pesquisar e consultar uma candidatura |
+| GUI/UX | layout responsivo, feedback de erros, estado vazio e confirmacao |
+| Robustez | validacao dupla, URLs, CSRF, SQL parametrizado e transacao |
+| Esquema da BD | tres tabelas normalizadas, PK/FK, indices e constraints |
+| Codificacao | MVC, JavaBeans, DAO, Service, Servlet e JSP separados |
+
+## 11. Roteiro recomendado para a defesa
+
+1. mostrar o `pom.xml` e destacar `release 17` e `packaging war`
+2. explicar o diagrama das tres camadas
+3. abrir o Bean `Candidatura`
+4. abrir o DAO e mostrar `PreparedStatement`, transacao e `rollback`
+5. abrir o Servlet e explicar GET, POST, forward e redirect
+6. abrir uma JSP e mostrar que apenas renderiza a informacao
+7. mostrar as tres tabelas no PostgreSQL
+8. submeter uma candidatura valida ao vivo
+9. pesquisar e abrir o detalhe do registo criado
+10. tentar um URL invalido ou telefone curto para demonstrar robustez
+
+Para a alteracao surpresa de uma hora, dividam o grupo por camadas: uma pessoa no Bean/BD, uma no DAO/Service, uma no Servlet e outra na JSP/CSS. No fim, reservem pelo menos 10 minutos para integrar e testar juntos.
+
+## 12. Testes
+
+Os testes automatizados verificam uma candidatura valida e rejeitam:
+
+- URL com protocolo perigoso
+- data futura
+- opcao forjada fora do catalogo
+- gravacao e leitura real via JDBC (quando `TEST_DATABASE_URL` estiver configurada)
+
+Execute:
+
+```bash
+mvn test
+```
+
+Para incluir o teste de integracao PostgreSQL:
+
+```bash
+TEST_DATABASE_URL='jdbc:postgresql://localhost:5432/cadastro_atlantico' mvn test
+```

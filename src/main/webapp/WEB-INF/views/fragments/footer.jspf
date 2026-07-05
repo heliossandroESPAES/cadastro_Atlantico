@@ -1,0 +1,12 @@
+</main>
+<footer class="site-footer">
+    <div class="footer-shell">
+        <div>
+            <strong>BANCO ATLANTICO</strong>
+            <p>Talento com excelência e impacto.</p>
+        </div>
+        <p>Aplicação web MVC · Java 17 · Servlets · JSP · PostgreSQL</p>
+    </div>
+</footer>
+</body>
+</html>
