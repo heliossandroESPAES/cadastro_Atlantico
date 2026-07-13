@@ -6,22 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#072b5a">
     <title><c:out value="${pageTitle}"/> | Banco ATLANTICO</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css?v=20260713">
     <script defer src="${pageContext.request.contextPath}/assets/js/app.js"></script>
 </head>
 <body>
 <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
 <header class="site-header">
     <div class="nav-shell">
-        <a class="brand" href="${pageContext.request.contextPath}/candidaturas" aria-label="Banco ATLANTICO - inicio">
+        <a class="brand" href="${pageContext.request.contextPath}/candidaturas/nova" aria-label="Banco ATLANTICO - inicio">
             <span class="brand-mark" aria-hidden="true">A</span>
             <span><strong>BANCO ATLANTICO</strong><small>Talento &amp; Carreiras</small></span>
         </a>
         <nav class="main-nav" aria-label="Navegação principal">
-            <a class="${pageKey eq 'list' ? 'nav-link active' : 'nav-link'}"
-               href="${pageContext.request.contextPath}/candidaturas">Candidaturas</a>
-            <a class="${pageKey eq 'form' ? 'button button-small' : 'button button-small'}"
-               href="${pageContext.request.contextPath}/candidaturas/nova">Nova candidatura</a>
+            <a class="${pageKey eq 'form' or pageKey eq 'success' ? 'nav-link active' : 'nav-link'}"
+               href="${pageContext.request.contextPath}/candidaturas/nova">Candidato</a>
+            <c:choose>
+                <c:when test="${sessionScope.adminAuthenticated}">
+                    <a class="${pageKey eq 'adminList' or pageKey eq 'adminDetail' ? 'nav-link active' : 'nav-link'}"
+                       href="${pageContext.request.contextPath}/admin/candidaturas">Painel admin</a>
+                    <a class="button button-small button-light" href="${pageContext.request.contextPath}/admin/logout">Sair</a>
+                </c:when>
+                <c:otherwise>
+                    <a class="${pageKey eq 'adminLogin' ? 'button button-small' : 'nav-link'}"
+                       href="${pageContext.request.contextPath}/admin/login">Login admin</a>
+                </c:otherwise>
+            </c:choose>
         </nav>
     </div>
 </header>

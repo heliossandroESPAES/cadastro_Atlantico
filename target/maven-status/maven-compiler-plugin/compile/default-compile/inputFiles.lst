@@ -5,6 +5,7 @@
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/service/CandidaturaOptions.java
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/service/CandidaturaService.java
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/service/ValidationException.java
+/home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/web/AdminServlet.java
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/web/AppContextListener.java
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/web/CandidaturaServlet.java
 /home/heliossandro-afonso/Documentos/trabalhos_uni/distribuidos/cadastro_Atlantico/src/main/java/ao/co/atlantico/candidaturas/web/CharacterEncodingFilter.java

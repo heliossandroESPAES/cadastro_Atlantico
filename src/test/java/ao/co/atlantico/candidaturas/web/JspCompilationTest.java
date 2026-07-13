@@ -20,8 +20,10 @@ class JspCompilationTest {
         compiler.setOutputDir(output.toAbsolutePath().toString());
         compiler.setJspFiles(String.join(",",
             "WEB-INF/views/candidatura-form.jsp",
+            "WEB-INF/views/candidatura-success.jsp",
             "WEB-INF/views/candidatura-list.jsp",
             "WEB-INF/views/candidatura-detail.jsp",
+            "WEB-INF/views/admin-login.jsp",
             "WEB-INF/views/error.jsp"
         ));
         compiler.setCompile(false);

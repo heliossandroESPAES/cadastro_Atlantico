@@ -81,6 +81,8 @@ public final class CandidaturaDAO {
             + (searching
                 ? " WHERE POSITION(LOWER(?) IN LOWER(c.nome_completo)) > 0"
                     + " OR POSITION(LOWER(?) IN LOWER(c.bi_passaporte)) > 0"
+                    + " OR POSITION(LOWER(?) IN LOWER(c.email)) > 0"
+                    + " OR POSITION(LOWER(?) IN LOWER(c.contacto_telefonico)) > 0"
                 : "")
             + " ORDER BY c.criado_em DESC LIMIT 100";
 
@@ -89,6 +91,8 @@ public final class CandidaturaDAO {
             if (searching) {
                 statement.setString(1, searchTerm.trim());
                 statement.setString(2, searchTerm.trim());
+                statement.setString(3, searchTerm.trim());
+                statement.setString(4, searchTerm.trim());
             }
             try (ResultSet result = statement.executeQuery()) {
                 List<Candidatura> candidaturas = new ArrayList<>();

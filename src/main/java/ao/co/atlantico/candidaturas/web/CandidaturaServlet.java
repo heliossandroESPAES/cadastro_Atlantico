@@ -31,8 +31,7 @@ import java.util.logging.Logger;
 public class CandidaturaServlet extends HttpServlet {
 
     private static final String FORM_VIEW = "/WEB-INF/views/candidatura-form.jsp";
-    private static final String LIST_VIEW = "/WEB-INF/views/candidatura-list.jsp";
-    private static final String DETAIL_VIEW = "/WEB-INF/views/candidatura-detail.jsp";
+    private static final String SUCCESS_VIEW = "/WEB-INF/views/candidatura-success.jsp";
     private static final String ERROR_VIEW = "/WEB-INF/views/error.jsp";
     private static final String CSRF_SESSION_KEY = "csrfToken";
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
@@ -51,15 +50,16 @@ public class CandidaturaServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if (!databaseAvailable(request, response)) {
-            return;
-        }
-
         String path = Optional.ofNullable(request.getPathInfo()).orElse("/");
         switch (path) {
-            case "/", "" -> showList(request, response);
-            case "/nova" -> showForm(request, response, new Candidatura(), Map.of());
-            case "/detalhe" -> showDetail(request, response);
+            case "/", "" -> response.sendRedirect(response.encodeRedirectURL(
+                request.getContextPath() + "/candidaturas/nova"));
+            case "/nova" -> {
+                if (databaseAvailable(request, response)) {
+                    showForm(request, response, new Candidatura(), Map.of());
+                }
+            }
+            case "/sucesso" -> showSuccess(request, response);
             default -> showError(request, response, HttpServletResponse.SC_NOT_FOUND,
                 "Pagina nao encontrada", "O endereco solicitado nao existe nesta aplicacao.");
         }
@@ -81,25 +81,6 @@ public class CandidaturaServlet extends HttpServlet {
         submit(request, response);
     }
 
-    private void showList(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String search = parameter(request, "q");
-        try {
-            List<Candidatura> candidaturas = service.listar(search);
-            request.setAttribute("candidaturas", candidaturas);
-            request.setAttribute("q", search);
-            request.getRequestDispatcher(LIST_VIEW).forward(request, response);
-        } catch (ValidationException exception) {
-            request.setAttribute("candidaturas", List.of());
-            request.setAttribute("q", search);
-            request.setAttribute("errors", exception.getErrors());
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            request.getRequestDispatcher(LIST_VIEW).forward(request, response);
-        } catch (SQLException exception) {
-            databaseError(request, response, exception);
-        }
-    }
-
     private void showForm(HttpServletRequest request, HttpServletResponse response, Candidatura candidatura,
             Map<String, String> errors) throws ServletException, IOException {
         request.setAttribute("candidatura", candidatura);
@@ -114,27 +95,16 @@ public class CandidaturaServlet extends HttpServlet {
         request.getRequestDispatcher(FORM_VIEW).forward(request, response);
     }
 
-    private void showDetail(HttpServletRequest request, HttpServletResponse response)
+    private void showSuccess(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Long id = positiveLong(request.getParameter("id"));
         if (id == null) {
             showError(request, response, HttpServletResponse.SC_BAD_REQUEST,
-                "Numero de registo invalido", "Informe um numero de candidatura maior do que zero.");
+                "Numero de registo invalido", "A confirmacao precisa de um numero de candidatura valido.");
             return;
         }
-        try {
-            Optional<Candidatura> candidatura = service.consultar(id);
-            if (candidatura.isEmpty()) {
-                showError(request, response, HttpServletResponse.SC_NOT_FOUND,
-                    "Candidatura nao encontrada", "Nao existe uma candidatura com o registo informado.");
-                return;
-            }
-            request.setAttribute("candidatura", candidatura.get());
-            request.setAttribute("success", "1".equals(request.getParameter("sucesso")));
-            request.getRequestDispatcher(DETAIL_VIEW).forward(request, response);
-        } catch (SQLException exception) {
-            databaseError(request, response, exception);
-        }
+        request.setAttribute("candidateId", id);
+        request.getRequestDispatcher(SUCCESS_VIEW).forward(request, response);
     }
 
     private void submit(HttpServletRequest request, HttpServletResponse response)
@@ -162,7 +132,7 @@ public class CandidaturaServlet extends HttpServlet {
         try {
             long id = service.submeter(candidatura);
             rotateCsrfToken(request.getSession());
-            String location = request.getContextPath() + "/candidaturas/detalhe?id=" + id + "&sucesso=1";
+            String location = request.getContextPath() + "/candidaturas/sucesso?id=" + id;
             response.sendRedirect(response.encodeRedirectURL(location));
         } catch (ValidationException exception) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

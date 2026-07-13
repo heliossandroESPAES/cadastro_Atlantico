@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <c:set var="pageTitle" value="Nova candidatura"/>
 <c:set var="pageKey" value="form"/>
@@ -8,7 +8,7 @@
     <div class="hero-content">
         <span class="eyebrow">Junte-se ao nosso talento</span>
         <h1>A sua próxima conquista pode começar aqui.</h1>
-        <p>Partilhe o seu percurso, as suas competências e a ambição que o move.</p>
+        <p>Área pública do candidato. Submeta a sua candidatura sem precisar de criar conta ou fazer login.</p>
         <div class="hero-features">
             <span><b>01</b> Preenchimento guiado</span>
             <span><b>02</b> Dados protegidos</span>
@@ -20,7 +20,7 @@
 
 <div class="content-shell form-shell">
     <div class="form-intro">
-        <div><span class="section-kicker">Formulário de candidatura profissional</span><h2>Conte-nos quem é.</h2></div>
+        <div><span class="section-kicker">Formulário público de candidatura</span><h2>Conte-nos quem é.</h2></div>
         <p>Os campos marcados com <strong>*</strong> são obrigatórios. Reveja os dados antes de submeter.</p>
     </div>
 

@@ -11,10 +11,12 @@ Sistema web de candidaturas profissionais adaptado para os requisitos do exame:
 ## 1. Funcionalidades
 
 - registo completo de uma candidatura profissional
-- confirmacao visual depois da submissao
-- listagem das 100 candidaturas mais recentes
-- pesquisa por nome ou B.I./Passaporte
-- consulta detalhada pelo numero do registo
+- lado publico para o candidato submeter candidatura sem login
+- confirmacao visual depois da submissao, sem expor a lista de candidatos
+- login administrativo com utilizador `admin` e senha `admin`
+- painel administrativo com listagem das 100 candidaturas mais recentes
+- pesquisa administrativa por nome, B.I./Passaporte, e-mail ou telefone
+- consulta detalhada protegida por sessao de administrador
 - areas de estudo e interesse com relacionamento muitos-para-muitos
 - validacao no navegador, no Servlet/Service e na base de dados
 - validacao segura de URLs de LinkedIn e portfolio
@@ -60,7 +62,8 @@ Servlet ──forward──► JSP/JSTL (Visao) ──► HTML/CSS/JavaScript
 - DAO: `src/main/java/ao/co/atlantico/candidaturas/dao/CandidaturaDAO.java`
 - conexao: `src/main/java/ao/co/atlantico/candidaturas/dao/ConnectionFactory.java`
 - regras e validacao: `src/main/java/ao/co/atlantico/candidaturas/service/CandidaturaService.java`
-- controlador: `src/main/java/ao/co/atlantico/candidaturas/web/CandidaturaServlet.java`
+- controlador publico: `src/main/java/ao/co/atlantico/candidaturas/web/CandidaturaServlet.java`
+- controlador admin: `src/main/java/ao/co/atlantico/candidaturas/web/AdminServlet.java`
 - visoes: `src/main/webapp/WEB-INF/views/`
 - esquema SQL: `src/main/resources/db/schema.sql`
 - interface: `src/main/webapp/assets/`
@@ -162,6 +165,8 @@ O `pom.xml` usa `maven.compiler.release=17`, que impede acidentalmente a utiliza
 4. copie `target/cadastro-atlantico.war` para a pasta `webapps` do Tomcat
 5. inicie o Tomcat
 6. abra `http://localhost:8080/cadastro-atlantico/`
+7. para administrar, aceda a `http://localhost:8080/cadastro-atlantico/admin/login`
+   com utilizador `admin` e senha `admin`
 
 No NetBeans:
 
@@ -174,10 +179,15 @@ No NetBeans:
 
 | Metodo | Rota | Responsabilidade |
 |---|---|---|
-| GET | `/candidaturas` | lista e pesquisa candidaturas |
-| GET | `/candidaturas/nova` | apresenta o formulario JSP |
+| GET | `/` | redirecciona para o formulario publico |
+| GET | `/candidaturas/nova` | apresenta o formulario publico sem login |
 | POST | `/candidaturas/nova` | valida e grava no PostgreSQL |
-| GET | `/candidaturas/detalhe?id=1` | consulta um registo pelo ID |
+| GET | `/candidaturas/sucesso?id=1` | confirma a submissao ao candidato |
+| GET | `/admin/login` | apresenta o login administrativo |
+| POST | `/admin/login` | autentica o administrador (`admin`/`admin`) |
+| GET | `/admin/logout` | termina a sessao administrativa |
+| GET | `/admin/candidaturas` | lista e pesquisa candidaturas no painel admin |
+| GET | `/admin/candidaturas/detalhe?id=1` | consulta um registo pelo ID, protegido por login |
 
 As JSP ficam dentro de `WEB-INF`, portanto nao podem ser chamadas directamente. O acesso passa sempre pelo controlador Servlet.
 
@@ -192,6 +202,8 @@ A aplicacao implementa:
 - `PreparedStatement` em todas as consultas contra SQL Injection
 - `<c:out>` nas JSP contra XSS
 - token CSRF na submissao
+- token CSRF no login administrativo
+- separacao de responsabilidades entre candidato publico e administrador autenticado
 - cabecalhos CSP, `nosniff`, `DENY` e politica de permissoes
 - transacao, `commit` e `rollback` no DAO
 - mensagens amigaveis sem expor detalhes internos da base de dados
@@ -202,8 +214,8 @@ A aplicacao implementa:
 
 | Criterio | Evidencia para mostrar |
 |---|---|
-| Funcionalidade | submeter, listar, pesquisar e consultar uma candidatura |
-| GUI/UX | layout responsivo, feedback de erros, estado vazio e confirmacao |
+| Funcionalidade | candidato submete sem login; admin entra, lista, pesquisa e consulta detalhes |
+| GUI/UX | telas separadas para candidato e admin, layout responsivo, feedback de erros, estado vazio e confirmacao |
 | Robustez | validacao dupla, URLs, CSRF, SQL parametrizado e transacao |
 | Esquema da BD | tres tabelas normalizadas, PK/FK, indices e constraints |
 | Codificacao | MVC, JavaBeans, DAO, Service, Servlet e JSP separados |
@@ -217,9 +229,10 @@ A aplicacao implementa:
 5. abrir o Servlet e explicar GET, POST, forward e redirect
 6. abrir uma JSP e mostrar que apenas renderiza a informacao
 7. mostrar as tres tabelas no PostgreSQL
-8. submeter uma candidatura valida ao vivo
-9. pesquisar e abrir o detalhe do registo criado
-10. tentar um URL invalido ou telefone curto para demonstrar robustez
+8. submeter uma candidatura valida ao vivo como candidato sem login
+9. entrar em `/admin/login` com `admin`/`admin`
+10. pesquisar e abrir o detalhe da candidatura no painel administrativo
+11. tentar um URL invalido ou telefone curto para demonstrar robustez
 
 Para a alteracao surpresa de uma hora, dividam o grupo por camadas: uma pessoa no Bean/BD, uma no DAO/Service, uma no Servlet e outra na JSP/CSS. No fim, reservem pelo menos 10 minutos para integrar e testar juntos.
 

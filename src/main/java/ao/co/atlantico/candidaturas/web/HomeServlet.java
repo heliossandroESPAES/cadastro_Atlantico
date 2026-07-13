@@ -12,6 +12,6 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/candidaturas"));
+        response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/candidaturas/nova"));
     }
 }

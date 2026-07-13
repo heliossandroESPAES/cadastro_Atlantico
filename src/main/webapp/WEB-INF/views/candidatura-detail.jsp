@@ -1,15 +1,8 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<c:set var="pageTitle" value="Detalhe da candidatura"/>
-<c:set var="pageKey" value="detail"/>
+<c:set var="pageTitle" value="Detalhe administrativo"/>
+<c:set var="pageKey" value="adminDetail"/>
 <%@ include file="fragments/header.jspf" %>
-
-<c:if test="${success}">
-    <div class="toast success-toast" role="status">
-        <span aria-hidden="true">✓</span>
-        <div><strong>Candidatura submetida com sucesso.</strong><p>O registo foi guardado no PostgreSQL.</p></div>
-    </div>
-</c:if>
 
 <section class="detail-hero">
     <div class="content-shell detail-hero-inner">
@@ -22,8 +15,8 @@
             </div>
         </div>
         <div class="detail-actions">
-            <a class="button button-light" href="${pageContext.request.contextPath}/candidaturas">← Voltar à lista</a>
-            <a class="button" href="${pageContext.request.contextPath}/candidaturas/nova">Nova candidatura</a>
+            <a class="button button-light" href="${pageContext.request.contextPath}/admin/candidaturas">← Voltar ao painel</a>
+            <a class="button" href="${pageContext.request.contextPath}/candidaturas/nova">Formulário público</a>
         </div>
     </div>
 </section>
