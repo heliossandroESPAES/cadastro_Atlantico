@@ -8,6 +8,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,6 +36,10 @@ class CandidaturaDAOIntegrationTest {
             assertEquals(candidatura.getNomeCompleto(), saved.getNomeCompleto());
             assertEquals(2, saved.getAreasInteresse().size());
             assertTrue(dao.findAll("Integracao JDBC").stream().anyMatch(item -> item.getId() == savedId));
+
+            Map<String, Long> counts = dao.countCandidatesByStudyArea();
+            assertTrue(counts.containsKey("Tecnologia e Engenharias"));
+            assertTrue(counts.get("Tecnologia e Engenharias") >= 1L);
         } finally {
             if (id > 0) {
                 try (var connection = connectionFactory.getConnection();

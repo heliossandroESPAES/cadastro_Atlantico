@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#072b5a">
     <title><c:out value="${pageTitle}"/> | Banco ATLANTICO</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css?v=20260713">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css?v=20260715">
     <script defer src="${pageContext.request.contextPath}/assets/js/app.js"></script>
 </head>
 <body>

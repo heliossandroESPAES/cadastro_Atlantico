@@ -1,0 +1,98 @@
+IMPLEMENTAÇÃO — QUANTIDADE DE CANDIDATOS POR ÁREA DE LICENCIATURA
+==================================================================
+
+Objetivo
+--------
+Apresentar no painel administrativo um card para cada área de estudo/
+licenciatura disponível no formulário, mostrando a quantidade de candidatos.
+
+Regra da contagem
+-----------------
+As áreas são armazenadas numa relação muitos-para-muitos:
+
+    candidatura -> candidatura_area -> area
+
+É contado o número de candidatos distintos associados a cada área do tipo
+ESTUDO. Se um candidato selecionar duas áreas, aparece uma vez na contagem
+de cada uma. As áreas sem candidatos também são apresentadas com quantidade 0.
+
+Camada Modelo / DAO
+-------------------
+Classe:
+  src/main/java/ao/co/atlantico/candidaturas/dao/CandidaturaDAO.java
+
+Método acrescentado:
+  public Map<String, Long> countCandidatesByStudyArea() throws SQLException
+
+Responsabilidades do método:
+  - executar uma consulta SQL fixa e segura sobre area e candidatura_area;
+  - filtrar somente area.tipo = 'ESTUDO';
+  - usar COUNT(DISTINCT ca.candidatura_id) para não duplicar candidatos;
+  - devolver um LinkedHashMap com nome da área e quantidade.
+
+Camada de Serviço
+-----------------
+Classe:
+  src/main/java/ao/co/atlantico/candidaturas/service/CandidaturaService.java
+
+Método acrescentado:
+  public Map<String, Long> contarCandidatosPorAreaEstudo() throws SQLException
+
+Responsabilidades do método:
+  - chamar o método do CandidaturaDAO;
+  - percorrer CandidaturaOptions.AREAS_ESTUDO;
+  - garantir a ordem do formulário;
+  - preencher com 0 as áreas que ainda não têm candidatos.
+
+Camada Controlador
+------------------
+Classe:
+  src/main/java/ao/co/atlantico/candidaturas/web/AdminServlet.java
+
+Método alterado:
+  private void showList(HttpServletRequest request,
+                        HttpServletResponse response)
+
+Alteração:
+  - chama service.contarCandidatosPorAreaEstudo();
+  - envia o resultado para a JSP com o atributo
+    "contagensAreasEstudo";
+  - mantém a pesquisa e a listagem de candidatos existentes.
+
+Camada de Visão
+---------------
+Ficheiro:
+  src/main/webapp/WEB-INF/views/candidatura-list.jsp
+
+Alteração:
+  - acrescentada a secção “Candidatos por área de licenciatura”;
+  - um <article class="area-count-card"> é renderizado para cada entrada
+    do mapa contagensAreasEstudo;
+  - cada card mostra areaCount.key (nome) e areaCount.value (quantidade).
+
+Estilos da interface:
+  Ficheiro: src/main/webapp/assets/css/app.css
+  Classes: .area-summary, .area-count-grid, .area-count-card,
+           .area-count-number e .area-count-icon.
+  A grelha usa cinco colunas em ecrãs grandes, três em tablet e duas em
+  telemóvel.
+
+Validação
+---------
+Teste de integração:
+  src/test/java/ao/co/atlantico/candidaturas/dao/
+  CandidaturaDAOIntegrationTest.java
+
+O teste confirma que:
+  - a contagem devolve a área Tecnologia e Engenharias;
+  - depois de gravar uma candidatura, a área possui pelo menos um candidato;
+  - a consulta dos relacionamentos continua funcional.
+
+Comandos usados para validar
+----------------------------
+  source scripts/use-java17.sh
+  mvn -q test
+  mvn -q package
+
+O WAR gerado é:
+  target/cadastro-atlantico.war

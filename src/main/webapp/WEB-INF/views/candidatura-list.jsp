@@ -16,6 +16,28 @@
     </div>
 </section>
 
+<section class="content-shell area-summary" aria-labelledby="areas-title">
+    <div class="section-heading">
+        <span class="section-kicker">Distribuição académica</span>
+        <h2 id="areas-title">Candidatos por área de licenciatura</h2>
+        <p class="section-description">Quantidade de candidatos em cada área de estudo selecionada no formulário.</p>
+    </div>
+    <div class="area-count-grid">
+        <c:forEach items="${contagensAreasEstudo}" var="areaCount">
+            <article class="area-count-card">
+                <div class="area-count-topline">
+                    <span class="area-count-icon" aria-hidden="true">A</span>
+                    <div class="area-count-number">
+                        <strong><c:out value="${areaCount.value}"/></strong>
+                        <span>candidatos</span>
+                    </div>
+                </div>
+                <h3><c:out value="${areaCount.key}"/></h3>
+            </article>
+        </c:forEach>
+    </div>
+</section>
+
 <section class="content-shell list-section" aria-labelledby="lista-title">
     <div class="section-heading split-heading">
         <div>

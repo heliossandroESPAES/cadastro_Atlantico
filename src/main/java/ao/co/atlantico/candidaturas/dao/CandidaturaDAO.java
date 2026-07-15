@@ -10,7 +10,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class CandidaturaDAO {
@@ -101,6 +103,33 @@ public final class CandidaturaDAO {
                 }
                 return candidaturas;
             }
+        }
+    }
+
+    /**
+     * Conta candidatos distintos associados a cada area de estudo.
+     *
+     * A associacao e muitos-para-muitos: se um candidato seleccionar duas
+     * areas, sera contado uma vez em cada uma delas.
+     */
+    public Map<String, Long> countCandidatesByStudyArea() throws SQLException {
+        String sql = """
+            SELECT a.nome, COUNT(DISTINCT ca.candidatura_id) AS total
+            FROM area a
+            LEFT JOIN candidatura_area ca ON ca.area_id = a.id
+            WHERE a.tipo = 'ESTUDO'
+            GROUP BY a.id, a.nome
+            ORDER BY a.id
+            """;
+
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet result = statement.executeQuery()) {
+            Map<String, Long> counts = new LinkedHashMap<>();
+            while (result.next()) {
+                counts.put(result.getString("nome"), result.getLong("total"));
+            }
+            return counts;
         }
     }
 

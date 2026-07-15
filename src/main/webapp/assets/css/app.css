@@ -112,6 +112,20 @@ a { color: inherit; }
 .success-reference { display: inline-flex; margin: 22px 0; padding: 12px 18px; border-radius: 999px; color: var(--navy-900); background: var(--cyan-100); font-size: 1.5rem; letter-spacing: .05em; }
 .success-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
+.area-summary { padding-block: 42px 16px; }
+.area-summary .section-heading { margin-bottom: 20px; }
+.area-summary .section-kicker { margin-bottom: 8px; }
+.section-description { margin: 7px 0 0; color: var(--muted); font-size: .9rem; }
+.area-count-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.area-count-card { display: flex; flex-direction: column; min-height: 164px; padding: 21px; border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: 0 7px 25px rgba(4,32,67,.07); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.area-count-card:hover { border-color: #8bcfdd; box-shadow: 0 14px 30px rgba(4,32,67,.1); transform: translateY(-3px); }
+.area-count-topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.area-count-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 13px; color: white; background: linear-gradient(135deg, var(--navy-800), var(--cyan-500)); font-size: .82rem; font-weight: 950; box-shadow: 0 7px 15px rgba(18,183,214,.2); }
+.area-count-number { display: grid; justify-items: end; line-height: 1; }
+.area-count-number strong { color: var(--navy-800); font-size: 2rem; letter-spacing: -.05em; }
+.area-count-number span { margin-top: 5px; color: var(--muted); font-size: .63rem; font-weight: 800; }
+.area-count-card h3 { margin: auto 0 0; color: var(--navy-900); font-size: .84rem; line-height: 1.3; }
+
 .application-form { display: grid; gap: 22px; }
 .form-section { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: 0 7px 26px rgba(4,32,67,.045); }
 .form-section-heading, .card-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
@@ -227,6 +241,7 @@ a { color: inherit; }
 @media (max-width: 900px) {
   .hero-decoration { display: none; }
   .login-page { grid-template-columns: 1fr; align-items: start; }
+  .area-count-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .checkbox-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .candidate-grid { grid-template-columns: 1fr; }
   .detail-layout { grid-template-columns: 1fr; }
@@ -249,6 +264,10 @@ a { color: inherit; }
   .login-copy h1 { font-size: clamp(2.35rem, 13vw, 3.4rem); }
   .login-card { padding: 27px 22px; border-radius: 20px; }
   .login-card::before { left: 22px; right: 22px; }
+  .area-summary { padding-top: 34px; }
+  .area-count-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .area-count-card { min-height: 148px; padding: 16px; }
+  .area-count-number strong { font-size: 1.7rem; }
   .form-intro, .split-heading, .footer-shell { align-items: flex-start; flex-direction: column; }
   .form-section { padding: 20px 16px; border-radius: 18px; }
   .form-grid, .data-grid { grid-template-columns: 1fr; }

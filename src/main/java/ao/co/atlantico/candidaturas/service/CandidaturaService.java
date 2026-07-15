@@ -63,6 +63,19 @@ public final class CandidaturaService {
         return dao.findAll(normalized);
     }
 
+    /**
+     * Devolve uma contagem para todas as areas apresentadas no formulario,
+     * incluindo as areas que ainda nao possuem candidatos (valor zero).
+     */
+    public Map<String, Long> contarCandidatosPorAreaEstudo() throws SQLException {
+        Map<String, Long> persistedCounts = dao.countCandidatesByStudyArea();
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (String area : CandidaturaOptions.AREAS_ESTUDO) {
+            counts.put(area, persistedCounts.getOrDefault(area, 0L));
+        }
+        return counts;
+    }
+
     public void validar(Candidatura c) throws ValidationException {
         Map<String, String> errors = new LinkedHashMap<>();
 

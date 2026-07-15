@@ -15,6 +15,7 @@ Sistema web de candidaturas profissionais adaptado para os requisitos do exame:
 - confirmacao visual depois da submissao, sem expor a lista de candidatos
 - login administrativo com utilizador `admin` e senha `admin`
 - painel administrativo com listagem das 100 candidaturas mais recentes
+- resumo no painel com a quantidade de candidatos por cada area de estudo/licenciatura
 - pesquisa administrativa por nome, B.I./Passaporte, e-mail ou telefone
 - consulta detalhada protegida por sessao de administrador
 - areas de estudo e interesse com relacionamento muitos-para-muitos

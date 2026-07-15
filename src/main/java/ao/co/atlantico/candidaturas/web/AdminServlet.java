@@ -137,12 +137,14 @@ public class AdminServlet extends HttpServlet {
             throws ServletException, IOException {
         String search = parameter(request, "q");
         try {
+            request.setAttribute("contagensAreasEstudo", service.contarCandidatosPorAreaEstudo());
             List<Candidatura> candidaturas = service.listar(search);
             request.setAttribute("candidaturas", candidaturas);
             request.setAttribute("q", search);
             request.getRequestDispatcher(LIST_VIEW).forward(request, response);
         } catch (ValidationException exception) {
             request.setAttribute("candidaturas", List.of());
+            request.setAttribute("contagensAreasEstudo", Map.of());
             request.setAttribute("q", search);
             request.setAttribute("errors", exception.getErrors());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
