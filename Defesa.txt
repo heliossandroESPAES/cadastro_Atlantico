@@ -4,7 +4,15 @@ IMPLEMENTAÇÃO — QUANTIDADE DE CANDIDATOS POR ÁREA DE LICENCIATURA
 Objetivo
 --------
 Apresentar no painel administrativo um card para cada área de estudo/
-licenciatura disponível no formulário, mostrando a quantidade de candidatos.
+licenciatura disponível no formulário, mostrando a quantidade de candidatos
+com o nível de escolaridade Licenciatura.
+
+Regra da validação
+------------------
+O formulário e o CandidaturaService aceitam todos os níveis previstos no
+catálogo: Ensino Medio, Curso Tecnico, Licenciatura, Pos-Graduacao, Mestrado
+e Doutoramento. A restrição de Licenciatura aplica-se somente à estatística
+dos cards, não ao envio da candidatura.
 
 Regra da contagem
 -----------------
@@ -12,9 +20,10 @@ As áreas são armazenadas numa relação muitos-para-muitos:
 
     candidatura -> candidatura_area -> area
 
-É contado o número de candidatos distintos associados a cada área do tipo
-ESTUDO. Se um candidato selecionar duas áreas, aparece uma vez na contagem
-de cada uma. As áreas sem candidatos também são apresentadas com quantidade 0.
+É contado o número de candidatos licenciados distintos associados a cada
+área do tipo ESTUDO. A consulta filtra candidatura.nivel_escolaridade =
+'Licenciatura'. Se um candidato selecionar duas áreas, aparece uma vez na
+contagem de cada uma. As áreas sem candidatos licenciados aparecem com 0.
 
 Camada Modelo / DAO
 -------------------
@@ -25,10 +34,11 @@ Método acrescentado:
   public Map<String, Long> countCandidatesByStudyArea() throws SQLException
 
 Responsabilidades do método:
-  - executar uma consulta SQL fixa e segura sobre area e candidatura_area;
-  - filtrar somente area.tipo = 'ESTUDO';
-  - usar COUNT(DISTINCT ca.candidatura_id) para não duplicar candidatos;
-  - devolver um LinkedHashMap com nome da área e quantidade.
+  - consultar area, candidatura_area e candidatura;
+  - filtrar area.tipo = 'ESTUDO';
+  - filtrar candidatura.nivel_escolaridade = 'Licenciatura';
+  - usar COUNT(DISTINCT c.id) para não duplicar candidatos;
+  - devolver um LinkedHashMap com o nome da área e a quantidade.
 
 Camada de Serviço
 -----------------
@@ -39,10 +49,15 @@ Método acrescentado:
   public Map<String, Long> contarCandidatosPorAreaEstudo() throws SQLException
 
 Responsabilidades do método:
-  - chamar o método do CandidaturaDAO;
+  - chamar o CandidaturaDAO;
   - percorrer CandidaturaOptions.AREAS_ESTUDO;
-  - garantir a ordem do formulário;
-  - preencher com 0 as áreas que ainda não têm candidatos.
+  - garantir a ordem apresentada no formulário;
+  - preencher com 0 as áreas sem candidatos licenciados.
+
+Validação de nível:
+  - CandidaturaOptions.NIVEIS_ESCOLARIDADE contém todos os níveis permitidos;
+  - CandidaturaService.validar(...) rejeita apenas valores fora desse catálogo;
+  - a contagem dos cards considera exclusivamente o nível "Licenciatura".
 
 Camada Controlador
 ------------------
@@ -55,8 +70,7 @@ Método alterado:
 
 Alteração:
   - chama service.contarCandidatosPorAreaEstudo();
-  - envia o resultado para a JSP com o atributo
-    "contagensAreasEstudo";
+  - envia o resultado para a JSP através de "contagensAreasEstudo";
   - mantém a pesquisa e a listagem de candidatos existentes.
 
 Camada de Visão
@@ -66,9 +80,8 @@ Ficheiro:
 
 Alteração:
   - acrescentada a secção “Candidatos por área de licenciatura”;
-  - um <article class="area-count-card"> é renderizado para cada entrada
-    do mapa contagensAreasEstudo;
-  - cada card mostra areaCount.key (nome) e areaCount.value (quantidade).
+  - um <article class="area-count-card"> é renderizado para cada entrada;
+  - cada card mostra o nome da área e a quantidade de licenciados.
 
 Estilos da interface:
   Ficheiro: src/main/webapp/assets/css/app.css
@@ -77,16 +90,20 @@ Estilos da interface:
   A grelha usa cinco colunas em ecrãs grandes, três em tablet e duas em
   telemóvel.
 
-Validação
----------
+Testes
+------
+Teste unitário:
+  src/test/java/ao/co/atlantico/candidaturas/service/CandidaturaServiceTest.java
+
+  aceitaCandidatoComOutroNivelDeEscolaridade() confirma que Curso Tecnico
+  pode ser submetido e não é bloqueado pela validação.
+
 Teste de integração:
   src/test/java/ao/co/atlantico/candidaturas/dao/
   CandidaturaDAOIntegrationTest.java
 
-O teste confirma que:
-  - a contagem devolve a área Tecnologia e Engenharias;
-  - depois de gravar uma candidatura, a área possui pelo menos um candidato;
-  - a consulta dos relacionamentos continua funcional.
+  confirma que um candidato Licenciatura entra na contagem e que um candidato
+  Curso Tecnico gravado diretamente no DAO não aumenta essa contagem.
 
 Comandos usados para validar
 ----------------------------

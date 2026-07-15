@@ -27,10 +27,17 @@ class CandidaturaDAOIntegrationTest {
         CandidaturaDAO dao = new CandidaturaDAO(connectionFactory);
         Candidatura candidatura = candidate();
         long id = 0;
+        long nonLicensedId = 0;
 
         try {
+            long before = dao.countCandidatesByStudyArea()
+                .getOrDefault("Tecnologia e Engenharias", 0L);
             long savedId = dao.save(candidatura);
             id = savedId;
+
+            Candidatura nonLicensed = candidate();
+            nonLicensed.setNivelEscolaridade("Curso Tecnico");
+            nonLicensedId = dao.save(nonLicensed);
 
             Candidatura saved = dao.findById(savedId).orElseThrow();
             assertEquals(candidatura.getNomeCompleto(), saved.getNomeCompleto());
@@ -39,12 +46,20 @@ class CandidaturaDAOIntegrationTest {
 
             Map<String, Long> counts = dao.countCandidatesByStudyArea();
             assertTrue(counts.containsKey("Tecnologia e Engenharias"));
-            assertTrue(counts.get("Tecnologia e Engenharias") >= 1L);
+            assertEquals(before + 1L, counts.get("Tecnologia e Engenharias"));
+
         } finally {
             if (id > 0) {
                 try (var connection = connectionFactory.getConnection();
                      PreparedStatement statement = connection.prepareStatement("DELETE FROM candidatura WHERE id = ?")) {
                     statement.setLong(1, id);
+                    statement.executeUpdate();
+                }
+            }
+            if (nonLicensedId > 0) {
+                try (var connection = connectionFactory.getConnection();
+                     PreparedStatement statement = connection.prepareStatement("DELETE FROM candidatura WHERE id = ?")) {
+                    statement.setLong(1, nonLicensedId);
                     statement.executeUpdate();
                 }
             }

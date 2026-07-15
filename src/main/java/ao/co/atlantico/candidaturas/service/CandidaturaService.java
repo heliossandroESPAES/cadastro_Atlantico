@@ -64,8 +64,8 @@ public final class CandidaturaService {
     }
 
     /**
-     * Devolve uma contagem para todas as areas apresentadas no formulario,
-     * incluindo as areas que ainda nao possuem candidatos (valor zero).
+     * Devolve uma contagem de candidatos licenciados para todas as areas
+     * apresentadas no formulario, incluindo as areas sem candidatos (zero).
      */
     public Map<String, Long> contarCandidatosPorAreaEstudo() throws SQLException {
         Map<String, Long> persistedCounts = dao.countCandidatesByStudyArea();
@@ -93,7 +93,8 @@ public final class CandidaturaService {
         required(errors, "email", c.getEmail(), "Informe o e-mail.");
         required(errors, "contactoTelefonico", c.getContactoTelefonico(), "Informe o contacto telefonico.");
         option(errors, "nivelEscolaridade", c.getNivelEscolaridade(),
-            Set.copyOf(CandidaturaOptions.NIVEIS_ESCOLARIDADE), "Seleccione o nivel de escolaridade.");
+            Set.copyOf(CandidaturaOptions.NIVEIS_ESCOLARIDADE),
+            "Seleccione um nivel de escolaridade valido.");
         validateAreas(errors, "areasEstudo", c.getAreasEstudo(), CandidaturaOptions.AREAS_ESTUDO,
             "Seleccione pelo menos uma area de estudo.");
         required(errors, "cursoTecnico", c.getCursoTecnico(), "Informe o curso.");

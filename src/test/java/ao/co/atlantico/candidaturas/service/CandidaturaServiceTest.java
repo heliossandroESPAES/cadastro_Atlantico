@@ -64,6 +64,14 @@ class CandidaturaServiceTest {
         assertTrue(exception.getErrors().containsKey("areasInteresse"));
     }
 
+    @Test
+    void aceitaCandidatoComOutroNivelDeEscolaridade() {
+        Candidatura candidatura = validCandidate();
+        candidatura.setNivelEscolaridade("Curso Tecnico");
+
+        assertDoesNotThrow(() -> service.validar(candidatura));
+    }
+
     private Candidatura validCandidate() {
         Candidatura candidatura = new Candidatura();
         candidatura.setNomeCompleto("Ana Manuel");

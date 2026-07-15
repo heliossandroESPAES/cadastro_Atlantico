@@ -107,16 +107,18 @@ public final class CandidaturaDAO {
     }
 
     /**
-     * Conta candidatos distintos associados a cada area de estudo.
+     * Conta candidatos licenciados distintos associados a cada area de estudo.
      *
      * A associacao e muitos-para-muitos: se um candidato seleccionar duas
      * areas, sera contado uma vez em cada uma delas.
      */
     public Map<String, Long> countCandidatesByStudyArea() throws SQLException {
         String sql = """
-            SELECT a.nome, COUNT(DISTINCT ca.candidatura_id) AS total
+            SELECT a.nome, COUNT(DISTINCT c.id) AS total
             FROM area a
             LEFT JOIN candidatura_area ca ON ca.area_id = a.id
+            LEFT JOIN candidatura c ON c.id = ca.candidatura_id
+                AND c.nivel_escolaridade = 'Licenciatura'
             WHERE a.tipo = 'ESTUDO'
             GROUP BY a.id, a.nome
             ORDER BY a.id

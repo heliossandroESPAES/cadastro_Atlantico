@@ -37,6 +37,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_candidatura_email_lower ON candidatura (LOW
 CREATE INDEX IF NOT EXISTS ix_candidatura_nome_lower ON candidatura (LOWER(nome_completo));
 CREATE INDEX IF NOT EXISTS ix_candidatura_criado_em ON candidatura (criado_em DESC);
 
+-- Remove a restrição antiga caso tenha sido criada numa versão anterior.
+ALTER TABLE candidatura DROP CONSTRAINT IF EXISTS ck_nivel_licenciatura;
+
 CREATE TABLE IF NOT EXISTS area (
     id SMALLSERIAL PRIMARY KEY,
     tipo VARCHAR(10) NOT NULL CHECK (tipo IN ('ESTUDO', 'INTERESSE')),

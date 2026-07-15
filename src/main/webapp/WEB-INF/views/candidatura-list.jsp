@@ -20,7 +20,7 @@
     <div class="section-heading">
         <span class="section-kicker">Distribuição académica</span>
         <h2 id="areas-title">Candidatos por área de licenciatura</h2>
-        <p class="section-description">Quantidade de candidatos em cada área de estudo selecionada no formulário.</p>
+        <p class="section-description">Quantidade de candidatos licenciados em cada área de estudo selecionada no formulário.</p>
     </div>
     <div class="area-count-grid">
         <c:forEach items="${contagensAreasEstudo}" var="areaCount">
