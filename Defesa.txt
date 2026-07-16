@@ -1,29 +1,4 @@
-IMPLEMENTAÇÃO — QUANTIDADE DE CANDIDATOS POR ÁREA DE LICENCIATURA
-==================================================================
 
-Objetivo
---------
-Apresentar no painel administrativo um card para cada área de estudo/
-licenciatura disponível no formulário, mostrando a quantidade de candidatos
-com o nível de escolaridade Licenciatura.
-
-Regra da validação
-------------------
-O formulário e o CandidaturaService aceitam todos os níveis previstos no
-catálogo: Ensino Medio, Curso Tecnico, Licenciatura, Pos-Graduacao, Mestrado
-e Doutoramento. A restrição de Licenciatura aplica-se somente à estatística
-dos cards, não ao envio da candidatura.
-
-Regra da contagem
------------------
-As áreas são armazenadas numa relação muitos-para-muitos:
-
-    candidatura -> candidatura_area -> area
-
-É contado o número de candidatos licenciados distintos associados a cada
-área do tipo ESTUDO. A consulta filtra candidatura.nivel_escolaridade =
-'Licenciatura'. Se um candidato selecionar duas áreas, aparece uma vez na
-contagem de cada uma. As áreas sem candidatos licenciados aparecem com 0.
 
 Camada Modelo / DAO
 -------------------
@@ -98,18 +73,9 @@ Teste unitário:
   aceitaCandidatoComOutroNivelDeEscolaridade() confirma que Curso Tecnico
   pode ser submetido e não é bloqueado pela validação.
 
-Teste de integração:
-  src/test/java/ao/co/atlantico/candidaturas/dao/
-  CandidaturaDAOIntegrationTest.java
-
-  confirma que um candidato Licenciatura entra na contagem e que um candidato
-  Curso Tecnico gravado diretamente no DAO não aumenta essa contagem.
 
 Comandos usados para validar
 ----------------------------
   source scripts/use-java17.sh
   mvn -q test
   mvn -q package
-
-O WAR gerado é:
-  target/cadastro-atlantico.war
